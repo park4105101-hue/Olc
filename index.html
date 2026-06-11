@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body{margin:0;font-family:-apple-system;background:#f2f2f7;}
+.header{display:flex;align-items:center;padding:14px 16px;background:#e9edf2;}
+.back{font-size:20px;margin-right:6px;}
+.titleWrap{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:600;}
+.koreaLogo{width:22px;height:22px;}
+.menu{margin-left:auto;display:flex;flex-direction:column;gap:4px;cursor:pointer;user-select:none;}
+.menu div{width:22px;height:2px;background:black;}
+
+/* 카드 */
+.card{margin:20px;background:white;border-radius:20px;position:relative;height:600px;box-shadow:0 10px 25px rgba(0,0,0,0.1);}
+.profile{position:absolute;top:30px;left:50%;transform:translateX(-50%);width:136.5px;height:178.5px;}
+.info{position:absolute;left:30px;font-size:20px;font-weight:800;line-height:1.35;}
+.detail .row{margin-top:5px;font-size:16px;font-weight:500;}
+#qrBirth,#qrAddr1{font-size:16px;font-weight:500;margin-top:5px;}
+.addr2Gray{color:#666;}
+.switch{position:absolute;right:30px;top:240px;width:60px;height:32px;background:#ccc;border-radius:20px;cursor:pointer;}
+.knob{width:28px;height:28px;background:white;border-radius:50%;position:absolute;top:2px;left:2px;transition:0.3s;}
+.switch.on{background:#1c1c1e;}
+.switch.on .knob{left:30px;}
+.bar{position:absolute;bottom:133px;left:20px;right:20px;height:5px;background:#ddd;border-radius:10px;overflow:hidden;}
+.fill{height:100%;width:100%;background:linear-gradient(to right,#4facfe,#4c00ff);transition:width 1s linear;}
+.time{position:absolute;bottom:105px;left:20px;font-size:13px;font-weight:400;color:#777;}
+.dateText{position:absolute;bottom:70px;width:100%;text-align:center;font-size:12px;font-weight:400;color:#999;}
+.qrText{position:absolute;bottom:95px;width:100%;text-align:center;font-size:12px;font-weight:400;color:#999;}
+.actionBtn{position:absolute;bottom:0;left:0;right:0;background:#2c2c2e;color:white;padding:18px;text-align:center;font-size:16px;font-weight:400;border-bottom-left-radius:20px;border-bottom-right-radius:20px;}
+.detail{display:none;}
+.qr{position:absolute;right:30px;top:255px;width:140px;height:140px;}
+.qr img{width:100%;height:100%;object-fit:contain;}
+
+/* 모달 */
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);justify-content:center;align-items:center;z-index:1000;}
+.modalContent{background:white;padding:20px;border-radius:12px;width:300px;display:flex;flex-direction:column;gap:10px;}
+.modalContent input{padding:6px;border:1px solid #ccc;border-radius:6px;font-size:14px;}
+.modalContent img{width:100px;height:120px;object-fit:cover;border:1px solid #ccc;border-radius:6px;}
+.modalContent button{padding:10px;background:#2c2c2e;color:white;border:none;border-radius:6px;cursor:pointer;}
+
+/* 배너 */
+.banner{position:fixed;bottom:0;left:0;width:100%;background:#00f0ff;color:#000;font-size:12px;font-weight:250;padding:5px 0;white-space:nowrap;overflow:hidden;z-index:9999;}
+.banner span{display:inline-block;padding-left:0;animation:scroll 20s linear infinite;}
+@keyframes scroll{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="back">◀</div>
+  <div class="titleWrap">
+    정부24
+    <img src="logo.png" class="koreaLogo">
+    주민등록증 모바일 확인서비스
+  </div>
+  <div class="menu" id="menuBtn">
+    <div></div><div></div><div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="profile">
+    <img id="profileImg" style="width:100%;height:100%;object-fit:cover;">
+  </div>
+
+  <div id="qrView">
+    <div class="qr"><img id="qr"></div>
+    <div class="info" style="top:240px;">
+      <div id="qrName"></div>
+      <div id="qrBirth"></div>
+      <div id="qrAddr1"></div>
+    </div>
+    <div class="qrText">QR코드를 리더기에 스캔하세요</div>
+  </div>
+
+  <div id="detailView" class="detail">
+    <div class="info" style="top:240px;"><div id="detailName"></div></div>
+    <div class="info" style="top:280px;">
+      <div class="row" id="birth"></div>
+      <div class="row" id="addr1El"></div>
+      <div class="row addr2Gray" id="addr2El"></div>
+      <div class="row" id="issueDate"></div>
+      <div class="row" id="issuerEl"></div>
+    </div>
+    <div class="switch" id="switchEl" onclick="toggleSwitch()"><div class="knob"></div></div>
+  </div>
+
+  <div class="bar"><div class="fill" id="fill"></div></div>
+  <div class="time">남은시간 <span id="time">30</span>초</div>
+  <div class="dateText" id="dateText"></div>
+  <div class="actionBtn" id="mainBtn" onclick="toggle()">상세정보 표시</div>
+</div>
+
+<!-- 모달 -->
+<div class="modal" id="editModal">
+  <div class="modalContent">
+    <label>프로필 사진</label>
+    <input type="file" id="editProfile" accept="image/*">
+    <img id="editPreview">
+    <label>이름</label><input type="text" id="editName">
+    <label>주민번호</label><input type="text" id="editBirth">
+    <label>주소</label><input type="text" id="editAddr1">
+    <label>상세주소</label><input type="text" id="editAddr2">
+    <label>발급일자</label><input type="text" id="editIssue">
+    <label>발급기관</label><input type="text" id="editIssuer">
+    <button id="saveBtn">저장</button>
+  </div>
+</div>
+
+<!-- 배너 -->
+<div class="banner" id="banner">
+  <span>
+    캡쳐된 모바일 신분증은 사용할 수 없습니다. 이 신분증은 모바일 신분증 어플에서 사용 가능한 신분증입니다. 신분등 위조 및 변조는 범죄입니다.
+    캡쳐된 모바일 신분증은 사용할 수 없습니다. 이 신분증은 모바일 신분증 어플에서 사용 가능한 신분증입니다. 신분등 위조 및 변조는 범죄입니다.
+  </span>
+</div>
+
+<script>
+let isDetail=false,isOn=false;
+let fullName="",fullBirth="",addr1="",addr2="",issue="",issuer="",profileData="";
+
+// 토글 상세보기
+function toggle(){
+  isDetail=!isDetail;
+  qrView.style.display=isDetail?"none":"block";
+  detailView.style.display=isDetail?"block":"none";
+  mainBtn.innerText=isDetail?"QR정보 표시":"상세정보 표시";
+  render();
+}
+
+function toggleSwitch(){
+  isOn=!isOn;
+  switchEl.classList.toggle("on",isOn);
+  render();
+}
+
+function formatBirth(b){return b.length===13?b.slice(0,6)+"-"+b.slice(6):b;}
+function render(){
+  let displayBirth=formatBirth(fullBirth);
+  let displayAddr2=addr2;
+  if(!isOn){
+    if(fullBirth.length>=7) displayBirth=fullBirth.slice(0,6)+"-*******";
+    if(addr2.length>4) displayAddr2=addr2.slice(0,Math.floor(addr2.length/2))+"*".repeat(addr2.length-Math.floor(addr2.length/2));
+    else displayAddr2="*".repeat(addr2.length);
+  }
+  detailName.innerText=fullName||"";
+  birth.innerText=displayBirth||"";
+  addr1El.innerText=addr1||"";
+  addr2El.innerText=displayAddr2||"";
+  issueDate.innerText=issue||"";
+  issuerEl.innerText=issuer||"";
+  qrName.innerText=fullName||"";
+  qrAddr1.innerText=addr1||"";
+  qrBirth.innerText=fullBirth.length>=6?fullBirth.slice(0,2)+"."+fullBirth.slice(2,4)+"."+fullBirth.slice(4,6):"";
+  if(profileData) profileImg.src=profileData;
+}
+
+// QR 생성
+function newQR(){qr.src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data="+Math.random();}
+let timeLeft=30;
+function update(){
+  timeLeft--;
+  if(timeLeft<=0){
+    timeLeft=30;
+    newQR();
+    fill.style.transition="none";
+    fill.style.width="100%";
+    setTimeout(()=>{fill.style.transition="width 1s linear";},50);
+  }
+  time.innerText=timeLeft;
+  fill.style.width=(timeLeft/30*100)+"%";
+}
+function updateTime(){
+  const n=new Date();
+  dateText.innerText=n.getFullYear()+"년 "+String(n.getMonth()+1).padStart(2,"0")+"월 "+
+  String(n.getDate()).padStart(2,"0")+"일 "+String(n.getHours()).padStart(2,"0")+":"+
+  String(n.getMinutes()).padStart(2,"0")+":"+String(n.getSeconds()).padStart(2,"0");
+}
+
+window.onload=()=>{
+  fullName=localStorage.getItem("name")||"";
+  fullBirth=localStorage.getItem("birth")||"";
+  addr1=localStorage.getItem("addr1")||"";
+  addr2=localStorage.getItem("addr2")||"";
+  issue=localStorage.getItem("issue")||"";
+  issuer=localStorage.getItem("issuer")||"";
+  profileData=localStorage.getItem("profile")||"";
+  render();
+  newQR();
+  setInterval(update,1000);
+  setInterval(updateTime,1000);
+
+  // 메뉴 트리플 클릭 모달
+  let clickCount=0,clickTimer;
+  const menuBtn=document.getElementById("menuBtn");
+  menuBtn.addEventListener("click",(e)=>{
+    clickCount++;
+    if(clickCount===1){clickTimer=setTimeout(()=>{clickCount=0;},1000);}
+    else if(clickCount===3){
+      clearTimeout(clickTimer);
+      clickCount=0;
+      openModal();
+    }
+  });
+
+  // 파일 미리보기
+  const editProfile=document.getElementById("editProfile");
+  const editPreview=document.getElementById("editPreview");
+  editProfile.addEventListener("change",(e)=>{
+    const file=e.target.files[0];
+    if(file) editPreview.src=URL.createObjectURL(file);
+  });
+
+  // 저장
+  document.getElementById("saveBtn").addEventListener("click",()=>{
+    if(editPreview.src) profileData=editPreview.src;
+    fullName=document.getElementById("editName").value;
+    fullBirth=document.getElementById("editBirth").value;
+    addr1=document.getElementById("editAddr1").value;
+    addr2=document.getElementById("editAddr2").value;
+    issue=document.getElementById("editIssue").value;
+    issuer=document.getElementById("editIssuer").value;
+
+    localStorage.setItem("profile",profileData);
+    localStorage.setItem("name",fullName);
+    localStorage.setItem("birth",fullBirth);
+    localStorage.setItem("addr1",addr1);
+    localStorage.setItem("addr2",addr2);
+    localStorage.setItem("issue",issue);
+    localStorage.setItem("issuer",issuer);
+
+    render();
+    closeModal();
+  });
+}
+
+// 모달 열기/닫기
+function openModal(){
+  document.getElementById("editModal").style.display="flex";
+  document.getElementById("banner").style.display="none";
+  editPreview.src=profileData||"";
+  document.getElementById("editName").value=fullName;
+  document.getElementById("editBirth").value=fullBirth;
+  document.getElementById("editAddr1").value=addr1;
+  document.getElementById("editAddr2").value=addr2;
+  document.getElementById("editIssue").value=issue;
+  document.getElementById("editIssuer").value=issuer;
+}
+function closeModal(){
+  document.getElementById("editModal").style.display="none";
+  document.getElementById("banner").style.display="block";
+}
+</script>
+</body>
+</html>
