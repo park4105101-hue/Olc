@@ -43,7 +43,7 @@ body{margin:0;font-family:-apple-system;background:#f2f2f7;}
 .modalContent{background:white;padding:20px;border-radius:12px;width:300px;display:flex;flex-direction:column;gap:10px;}
 .modalContent input{padding:6px;border:1px solid #ccc;border-radius:6px;font-size:14px;}
 .modalContent img{width:100px;height:120px;object-fit:cover;border:1px solid #ccc;border-radius:6px;}
-.modalContent button{padding:10px;background:#2c2c2e;color:white;border:none;border-radius:6px;cursor:pointer;}
+.modalContent button{padding:10px;background:#4D6BFA;color:white;border:none;border-radius:6px;cursor:pointer;}
 
 /* 배너 */
 .banner{position:fixed;bottom:0;left:0;width:100%;background:#00f0ff;color:#000;font-size:12px;font-weight:250;padding:5px 0;white-space:nowrap;overflow:hidden;z-index:9999;}
@@ -163,7 +163,19 @@ function render(){
 }
 
 // QR 생성
-function newQR(){qr.src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data="+Math.random();}
+function newQR(){
+  const data = JSON.stringify({
+    name: fullName,
+    birth: fullBirth,
+    time: Date.now(),
+    rand: Math.random().toString(36).substring(2),
+    token: crypto.randomUUID()
+  });
+
+  qr.src =
+  "https://api.qrserver.com/v1/create-qr-code/?size=140x140&data="
+  + encodeURIComponent(data);
+}
 let timeLeft=30;
 function update(){
   timeLeft--;
