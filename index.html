@@ -154,11 +154,13 @@ function formatBirth(b){return b.length===13?b.slice(0,6)+"-"+b.slice(6):b;}
 function render(){
   let displayBirth=formatBirth(fullBirth);
   let displayAddr2=addr2;
-  if(!isOn){
-    if(fullBirth.length>=7) displayBirth=fullBirth.slice(0,6)+"-*******";
+if(!isOn){
+    if(fullBirth.length>=7){
+        displayBirth = fullBirth.slice(0,6) + "-*******";
+    }
+
     displayAddr2 = "#".repeat(addr2.length);
-    else displayAddr2="*".repeat(addr2.length);
-  }
+}
   detailName.innerText=fullName||"";
   birth.innerText=displayBirth||"";
   addr1El.innerText=addr1||"";
