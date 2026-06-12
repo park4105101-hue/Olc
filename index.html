@@ -156,7 +156,7 @@ function render(){
   let displayAddr2=addr2;
   if(!isOn){
     if(fullBirth.length>=7) displayBirth=fullBirth.slice(0,6)+"-*******";
-    if(addr2.length>4) displayAddr2=addr2.slice(0,Math.floor(addr2.length/2))+"*".repeat(addr2.length-Math.floor(addr2.length/2));
+    displayAddr2 = "#".repeat(addr2.length);
     else displayAddr2="*".repeat(addr2.length);
   }
   detailName.innerText=fullName||"";
