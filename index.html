@@ -174,7 +174,14 @@ if(!isOn){
 }
 
 // QR 생성
-function newQR(){qr.src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data="+Math.random();}
+function newQR(){
+  const dummy =
+    Math.random().toString(36).repeat(28);
+
+  qr.src =
+    "https://api.qrserver.com/v1/create-qr-code/?size=140x140&data="
+    + dummy;
+    }
 let timeLeft=30;
 function update(){
   timeLeft--;
