@@ -1,6 +1,6 @@
 {
-  "name": "내 앱 이름",
-  "short_name": "내 앱",
+  "name": "정부 24",
+  "short_name": "정부 24",
   "display": "standalone",
   "start_url": "./",
   "icons": [
